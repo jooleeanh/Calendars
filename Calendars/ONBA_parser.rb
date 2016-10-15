@@ -1,87 +1,177 @@
 require 'open-uri'
 require 'nokogiri'
-require 'date'
+require 'csv'
+require 'json'
+require 'colorize'
+require 'pry-byebug'
 
-url = "http://www.opera-bordeaux.com/calendar?keys=&field_date_show_date_value=&term_node_tid_depth=All&term_node_tid_depth_1=All&field_public_type_target_id=All&field_accessibilite_value=All"
-html_file = open(url)
-html_doc = Nokogiri::HTML(html_file)
-
-all_events = {}
+def make_html_doc
+  url = "http://www.opera-bordeaux.com/calendar?keys=&field_date_show_date_value=&term_node_tid_depth=All&term_node_tid_depth_1=All&field_public_type_target_id=All&field_accessibilite_value=All"
+  html_file = open(url)
+  Nokogiri::HTML(html_file)
+end
 
 MONTH = %w(index0 janvier février mars avril mai juin juillet août septembre octobre novembre décembre)
 
-html_doc.search('.calendar-result').search('.row').each_with_index do |row, index|
-  attributes = {}
+
+
+def get_date(row)
   # date-day
-  attributes[:day] = row.search('.show-date-day').text.to_i
+  day = row.search('.show-date-day').text.to_i
   # date-month
   month = row.search('.show-date-month').text
   month = MONTH.index(month)
-  attributes[:month] = month
   # date-year
-  attributes[:year] = row.search('.show-date-year').text.to_i
+  year = row.search('.show-date-year').text.to_i
+  [year, month, day]
+end
 
-  row.each do |_|
-    # attributes = common_attributes
-    # date-time
-    time = row.search('.show-place-time').text
-    attributes[:time] = time
-    array = time.split(" ")
-    hour = array[0].to_i
-    # hour -= 12 if hour > 12
-    attributes[:hour] = hour
-    minutes = array[2].to_i
-    attributes[:minutes] = minutes
-    # date = Time.new(attributes[:year], attributes[:month], attributes[:day], attributes[:hour], attributes[:minutes], 0, "+02:00")
-    date = Time.new(attributes[:year], attributes[:month], attributes[:day], attributes[:hour], attributes[:minutes], 0, "+02:00") unless attributes[:day] == 0
-    # date = Time.new(1993, 02, 24, 12, 0, 0, "+09:00")
-    attributes[:date] = date
-    # artists
-    artists = row.search('.show-author').text
-    attributes[:artists] = artists
-    # details
-    details = row.search('.show-more').text
-    details = details.strip
-    attributes[:details] = details
-    # info
-    info = row.search('.date-show-info').text
-    info = info.strip.gsub(/\s#.{7}/, "")
-    attributes[:info] = info
-    # location
-    if row.search('.tag-inverse').text == ""
-      location = row.search('.tag-inverse').text
-    else
-      location = row.search('.tag-inverse').text
-    end
-    location = location.gsub(attributes[:time], "") # get rid of time
-    location = location.gsub(/\\.|\s{2,}/, "") # get rid of \n and \s
-    # location = location.strip
-    attributes[:location] = location
-    # event title
-    title = row.search('.col-md-8').text
-    title = title.gsub(attributes[:artists], "")
-    title = title.gsub(attributes[:details], "")
-    title = title.gsub(attributes[:info], "")
-    title = title.gsub(/\s#.{7}/, "")
-    title = title.tr('+', '').strip
-    attributes[:title] = title
-    # store in hash
-    if attributes[:day] == 0
-      # do nothing
-    else
-      all_events["#{attributes[:day]}-#{index}"] = attributes
+def get_time(row)
+  time = row.search('.show-place-time').text
+  # attributes[:time] = time
+  array = time.split(" ")
+  hour = array[0].to_i
+  minutes = array[2].to_i
+  [hour, minutes]
+end
+
+def make_date(date, time)
+  Time.new(date[0], date[1], date[2], time[0], time[1], 0, "+02:00") unless date[2] == 0
+end
+
+def get_metadata(row)
+  time = row.search('.show-place-time').text
+  hash = {}
+  hash[:artists] = row.search('.show-author').text
+  hash[:details] = row.search('.show-more').text.strip
+  hash[:info] = row.search('.date-show-info').text.strip.gsub(/\s#.{7}/, "")
+  hash[:location] = row.search('.tag-inverse').text.gsub(time, "").gsub(/\\.|\s{2,}/, "")
+  hash
+end
+
+def get_title(row, attributes)
+  title = row.search('.col-md-8').text
+  title = title.gsub(attributes[:artists], "").gsub(attributes[:details], "")
+  title = title.gsub(attributes[:info], "").gsub(/\s#.{7}/, "")
+  title.tr('+', '').strip
+end
+
+def onba_scraper(html_doc)
+  event_hash = {}
+  html_doc.search('.calendar-result').search('.row').each_with_index do |row, index|
+    attributes = {}
+    date = get_date(row)
+    row.each do |_|
+      attributes[:date] = make_date(date, get_time(row))
+      attributes = attributes.merge(get_metadata(row))
+      attributes[:title] = get_title(row, attributes)
+      invalid_entry = attributes[:date] == nil
+      event_hash["#{attributes[:date].day}-#{index}"] = attributes unless invalid_entry
     end
   end
-
+  event_hash
 end
 
-# url
-array = []
-html_doc.search('//a[@href][@hreflang]').each do |link|
-  array << link['href']
+def print_hash(event_hash)
+  event_hash.each_with_index do |key, index|
+    puts '-' * 40
+    puts "#{index} - #{key}"
+  end
 end
 
-all_events.each_with_index do |key, index|
-  puts '-' * 40
-  puts "#{index} - #{key}"
+# TODO:
+def get_events_url
+  array = []
+  html_doc.search('//a[@href][@hreflang]').each do |link|
+    array << link['href']
+  end
 end
+
+def store_into_csv(event_hash, filepath)
+  filepath = filepath + ".csv"
+  csv_options = { col_sep: ',', force_quotes: true, quote_char: '"' }
+  header = %w(id date artists details info location title)
+  CSV.open(filepath, 'wb', csv_options) do |csv|
+    csv << header
+    event_hash.each do |key, value|
+      array = [key]
+      value.each do |k, v|
+        array << v
+      end
+      csv << array
+    end
+  end
+  puts "CSV file ".green + filepath + " created!".green + "\n"
+end
+
+# TODO:
+def store_into_xml(event_hash, filepath)
+  puts "Not implemented yet"
+end
+
+def store_into_json(event_hash, filepath)
+  filepath = filepath + '.json'
+  File.open(filepath, 'w') do |file|
+    file.write(JSON.generate(event_hash))
+  end
+  puts "JSON file ".green + filepath + " created!".green + "\n"
+end
+
+def print_choices(event_hash)
+  print "(Scraping status: "
+  event_hash.empty? ? (puts "Not scraped)".light_red) : (puts "Scraped)".green)
+  choices = [
+    "Scrape ONBA website (necessary before anything)",
+    "Print hash of ONBA events",
+    "Store ONBA events into a CSV file",
+    "Store ONBA events into a JSON file",
+    "Store ONBA events into a xml file",
+    "Exit program"
+  ]
+  choices.each_with_index do |choice, index|
+    puts "#{(index + 1).to_s.red} - #{choice}"
+  end
+end
+
+def please_scrape_first
+  puts `clear` + "\n"
+  puts "Please scrape first"
+  puts "\n"
+end
+
+def interface
+  event_hash = {}
+  loop do
+    print `clear`
+    puts "What would you like to do?\n\n"
+    print_choices(event_hash)
+    puts "\n"
+    input = 0
+    while input <= 0 || input > 6
+      input = gets.chomp.to_i
+    end
+    filepath = Time.now.strftime("ONBA_%Y-%m-%d")
+    case input
+    when 1
+      html_doc = make_html_doc
+      event_hash = onba_scraper(html_doc)
+      puts "Scraping done!"
+    when 2
+
+      event_hash.empty? ? please_scrape_first : print_hash(event_hash)
+      gets.chomp
+    when 3
+      event_hash.empty? ? please_scrape_first : store_into_csv(event_hash, filepath)
+      gets.chomp
+    when 4
+      event_hash.empty? ? please_scrape_first : store_into_json(event_hash, filepath)
+      gets.chomp
+    when 5
+      event_hash.empty? ? please_scrape_first : store_into_xml(event_hash, filepath)
+      gets.chomp
+    when 6 then exit
+    end
+  end
+end
+
+interface
