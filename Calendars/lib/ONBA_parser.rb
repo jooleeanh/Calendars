@@ -13,8 +13,6 @@ end
 
 MONTH = %w(index0 janvier février mars avril mai juin juillet août septembre octobre novembre décembre)
 
-
-
 def get_date(row)
   # date-day
   day = row.search('.show-date-day').text.to_i
@@ -157,7 +155,6 @@ def interface
       event_hash = onba_scraper(html_doc)
       puts "Scraping done!"
     when 2
-
       event_hash.empty? ? please_scrape_first : print_hash(event_hash)
       gets.chomp
     when 3
