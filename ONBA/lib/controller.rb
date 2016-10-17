@@ -1,6 +1,3 @@
-require 'colorize'
-require_relative 'view'
-
 class Controller
   attr_reader :event_hash
 

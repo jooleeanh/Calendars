@@ -1,5 +1,6 @@
 require_relative "router"
 require_relative "event_list"
+require_relative "view"
 
 def create_url
   domain = "http://www.opera-bordeaux.com/calendar"
