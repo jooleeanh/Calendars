@@ -4,14 +4,15 @@ class Router
   def initialize(view)
     @view = view
     @controller = Controller.new
+    @directories = @controller.get_directories
   end
 
   def run
     loop do
-      input = 0
-      while input <= 0 || input > 3
-        @view.greeting
-        @view.display_choices
+      input = -1
+      while input < 0 || input > @directories.size
+        @view.greeting("city")
+        @view.display_choices(@directories)
         input = gets.chomp.to_i
       end
       dispatch(input)
@@ -21,12 +22,11 @@ class Router
   private
 
   def dispatch(input)
-    case input
-    when 1 then @controller.go_to_boston
-    when 2 then @controller.go_to_bordeaux
-    when 3 then
+    if input == 0
       puts "\n"
       exit
+    else
+      @controller.go_to(@directories[input - 1])
     end
   end
 
