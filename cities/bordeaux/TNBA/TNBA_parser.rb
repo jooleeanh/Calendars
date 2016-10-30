@@ -1,13 +1,13 @@
-require 'open-uri'
-require 'nokogiri'
 require 'pry-byebug'
+require 'json'
 
 class TnbaParser
-  def initialize
-    @events_url = "season_2016_2017.html"
-    @event_url = "tnba_event.html"
-    @events = Nokogiri::HTML(File.open(@events_url), nil, 'utf-8')
-    @event = Nokogiri::HTML(File.open(@event_url), nil, 'utf-8')
+  attr_reader :attributes, :links
+  attr_accessor :event
+
+  def initialize(events_doc)
+    @events = events_doc
+    @event = nil
     @links = []
     @attributes = {}
   end
@@ -27,7 +27,7 @@ class TnbaParser
   }
 
   def parse_events
-    @events.search('#block-views-accueil-programmation')
+    @events.search('#block-views-accueil-2016-2017')
         .css('.view-content > div').each do |event|
       @links << event.css(CSS[:link]).attribute("href").text
     end
@@ -35,7 +35,6 @@ class TnbaParser
 
   def parse_event
     event = @event.search('.content .clearfix')
-    # p event.css(CSS[:date_range]).text.strip
     @attributes[:genre] = event.css(CSS[:genre]).text.strip
     @attributes[:title] = event.css(CSS[:title]).text.strip
     @attributes[:date_range] = event.css(CSS[:date_range]).text.strip
@@ -43,17 +42,49 @@ class TnbaParser
     parse_performance_info
     parse_crew_info
     parse_production_info
-    @attributes[:press_review] = event.css(CSS[:press_review]).attribute("href").text
-    @attributes[:attachment] = event.css(CSS[:attachment]).attribute("href").text
-    binding.pry
+    parse_review
+    parse_attachment
+  end
+
+  def parse_review
+    begin
+      press_review = event.css(CSS[:press_review]).attribute("href").text
+    rescue
+      puts "'#{@attributes[:title]}' doesn't have a 'press_review'"
+    else
+      @attributes[:press_review] = press_review
+    end
+  end
+
+  def parse_attachment
+    begin
+      attachment = event.css(CSS[:attachment]).attribute("href").text
+    rescue
+      puts "'#{@attributes[:title]}' doesn't have an 'attachment'"
+    else
+      @attributes[:attachment] = attachment
+    end
   end
 
   def parse_event_info
     event = @event.search('.content .clearfix').css(CSS[:infos_pratique])
     @attributes[:performance_times] = event.css("p span span[style='color:#000;']").text
     extra1 = event.css('p')[0].text.strip
-    extra2 = event.css('p span[style="color:#E5007D;"]')[0].text
-    info = event.text.gsub(@attributes[:performance_times], "").gsub(extra1, "").gsub(extra2, "").strip.split(" – ")
+    begin
+      extra2 = event.css('p span[style="color:#E5007D;"]')[0].text
+    rescue
+      puts "error_rescue: empty field in event_info"
+    else
+      extra2 = event.css('p span[style="color:#E5007D;"]')[0].text
+    end
+    info = event.text.gsub(" ", "").gsub(@attributes[:performance_times], "")
+    begin
+      info.gsub(extra1, "").gsub(extra2, "").strip.split(" – ")
+    rescue
+      puts "error_rescue: empty field in event_info"
+    else
+      info = info.gsub(extra1, "").gsub(extra2, "").strip.split(" – ")
+    end
     @attributes[:organization] = info[0]
     @attributes[:location] = info[1]
     @attributes[:duration] = info[2]
@@ -63,7 +94,13 @@ class TnbaParser
   def parse_performance_info
     event = @event.search('.content .clearfix').css(CSS[:event_info])
     @attributes[:description_header] = event.css("h1 > span").text.strip
-    @attributes[:description_content] = event.css("p")[0].text.strip
+    begin
+      event.css("p")[0].text.strip
+    rescue
+      puts "error_rescue: empty field in performance_info"
+    else
+      @attributes[:description_content] = event.css("p")[0].text.strip
+    end
   end
 
   def parse_crew_info
@@ -79,7 +116,13 @@ class TnbaParser
         names_by_job.each { |e| jobs = jobs.gsub(e, "") }
         jobs = jobs.split("\n")
         jobs.each_with_index do |job, i|
-          crew[job] = names_by_job[i].split("\n")
+          begin
+            names_by_job[i].split("\n")
+          rescue
+            puts "error_rescue: empty field in crew_info"
+          else
+            crew[job] = names_by_job[i].split("\n")
+          end
         end
         @attributes[:crew] = crew
       end
@@ -90,15 +133,21 @@ class TnbaParser
     event = @event.search('.content .clearfix')
     all = event.css(CSS[:production_info])[1]
     bold_text = []
-    all.css('strong').each do |content|
-      bold_text << content.text.strip
+    begin
+      all.css('strong')
+    rescue
+      puts "error_rescue: empty field in production_info"
+    else
+      all.css('strong').each do |content|
+        bold_text << content.text.strip
+      end
+      normal_text = all.text
+      bold_text.each { |e| normal_text = normal_text.gsub(e, "") }
+      info = {}
+      normal_text.split("\n").each_with_index do |line, index|
+        info[line] = bold_text[index]
+      end
+      @attributes[:production_info] = info
     end
-    normal_text = all.text
-    bold_text.each { |e| normal_text = normal_text.gsub(e, "") }
-    info = {}
-    normal_text.split("\n").each_with_index do |line, index|
-      info[line] = bold_text[index]
-    end
-    @attributes[:production_info] = info
   end
 end

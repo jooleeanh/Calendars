@@ -14,7 +14,8 @@ class ParserViewBSO
 
   def greeting
     print `clear`
-    puts "What would you like to do?\n\n"
+    puts "Welcome to Calendars - [Boston] - [BSO] Boston Symphony Orchestra\n".light_cyan
+    puts "What would you like to do?\n".light_black
   end
 
   def display_choices(urls_empty_bool, events_empty_bool)
