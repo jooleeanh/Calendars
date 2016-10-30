@@ -1,10 +1,10 @@
-require_relative 'boston_controller'
+require_relative 'controller_bordeaux'
 require_relative '../router'
 
-class BostonRouter < Router
+class RouterBordeaux < Router
   def initialize(view)
     @view = view
-    @controller = BostonController.new
+    @controller = ControllerBordeaux.new
     @directories = @controller.get_directories
     @level = "organization"
   end

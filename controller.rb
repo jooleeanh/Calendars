@@ -9,12 +9,11 @@ class Controller
   def go_to(level, directory, file = __FILE__)
     path = File.dirname(file) + '/' + directory + '/'
     if level == "city"
-      path += directory + '_app'
+      path += 'app_' + directory
     elsif level == "organization"
-      path += 'parser_app_' + directory
+      path += 'app_parser_' + directory
     end
     path += '.rb'
-    binding.pry
     system("ruby", path)
   end
 end

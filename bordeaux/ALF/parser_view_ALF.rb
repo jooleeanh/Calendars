@@ -1,20 +1,20 @@
 require 'colorize'
 
-class ParserViewBSO
+class ParserViewALF
   def initialize
     @choices = [
-      "Scrape BSO website for events' urls (necessary before anything)",
-      "Print list of BSO events' urls",
+      "Scrape ALF website for events' urls (necessary before anything)",
+      "Print list of ALF events' urls",
       "Scrape all the events",
       "View all events",
-      "Store BSO events into a JSON file",
+      "Store ALF events into a JSON file",
       "Exit program"
     ]
   end
 
   def greeting
     print `clear`
-    puts "Welcome to Calendars - [Boston] - [BSO] Boston Symphony Orchestra\n".light_cyan
+    puts "Welcome to Calendars - [Bordeaux] - [ALF] Allez Les Filles\n".light_cyan
     puts "What would you like to do?\n".light_black
   end
 
@@ -37,7 +37,7 @@ class ParserViewBSO
 
   def display_array(array)
     print `clear`
-    puts "BSO events (urls)\n\n"
+    puts "ALF events (urls)\n\n"
     array.each_with_index do |link, index|
       puts "#{index}".light_red + " - #{link}"
       sleep(0.01)

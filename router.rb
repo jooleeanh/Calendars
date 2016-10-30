@@ -14,7 +14,7 @@ class Router
       input = -1
       while input < 0 || input > @directories.size
         @view.greeting(@level)
-        @view.display_choices(@directories)
+        @view.display_choices(@level, @directories)
         input = gets.chomp.to_i
       end
       dispatch(input)

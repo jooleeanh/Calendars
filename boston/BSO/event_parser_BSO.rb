@@ -1,13 +1,9 @@
-require 'json'
+require_relative '../../.event_parser'
 
-class ParserEventBSO
-  attr_reader :attributes
-
+class EventParserBSO < EventParser
   def initialize(nokodoc, view, event_url)
+    super
     @nokodoc = nokodoc.search(".performance-detail")
-    @view = view
-    @attributes = {}
-    @attributes[:url] = event_url
   end
 
   def parse_all

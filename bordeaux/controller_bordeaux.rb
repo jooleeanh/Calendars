@@ -1,7 +1,7 @@
 require "pry-byebug"
 require_relative '../controller'
 
-class BordeauxController < Controller
+class ControllerBordeaux < Controller
   def get_directories
     super(__FILE__)
   end
