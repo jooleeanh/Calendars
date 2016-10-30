@@ -1,6 +1,6 @@
 require 'colorize'
 
-class View
+class ParserViewONBA
   def initialize
     @choices = [
       "Scrape ONBA website (necessary before anything)",

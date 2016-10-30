@@ -1,16 +1,6 @@
-require_relative "router"
-require_relative "event_list"
-require_relative "view"
-
-
-url = url_onba_list
-event_list = EventList.new(url)
-view = View.new
-
-Router.new(event_list, view).run
-
-
-
+require_relative "parser_router_ONBA"
+require_relative "parser_calendar_ONBA"
+require_relative "parser_view_ONBA"
 
 def url_onba_list
   domain = "http://www.opera-bordeaux.com/calendar"
@@ -19,3 +9,9 @@ def url_onba_list
   field = "&field_public_type_target_id=All&field_accessibilite_value=All"
   domain + keys + nodes + field
 end
+
+url = url_onba_list
+calendar = ParserCalendarONBA.new(url)
+view = ParserViewONBA.new
+
+ParserRouterONBA.new(calendar, view).run

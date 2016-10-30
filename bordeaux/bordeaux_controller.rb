@@ -1,13 +1,11 @@
 require "pry-byebug"
-# require_relative 'cities/boston/BSO/parser_app_BSO'
-# require_relative 'cities/bordeaux/ONBA/parser_app_BSO'
+require_relative '../controller'
 
-class BordeauxController
-  def initialize
+class BordeauxController < Controller
+  def get_directories
+    super(__FILE__)
   end
-
-  def go_to_ONBA
-    path_ONBA = File.dirname(__FILE__)+'/ONBA/parser_app_ONBA.rb'
-    exec("ruby", path_ONBA)
+  def go_to(level, directories)
+    super(level, directories, __FILE__)
   end
 end

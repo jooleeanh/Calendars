@@ -5,7 +5,7 @@ require 'json'
 require 'colorize'
 require 'unicode_utils'
 
-class EventList
+class ParserCalendarONBA
   def initialize(url)
     @html_doc = make_html_doc(url)
     @month = %w(index0 janvier février mars avril mai juin juillet août septembre octobre novembre décembre)

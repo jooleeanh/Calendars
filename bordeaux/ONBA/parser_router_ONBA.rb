@@ -1,9 +1,9 @@
-require_relative 'controller'
+require_relative 'parser_controller_ONBA'
 
-class Router
+class ParserRouterONBA
   def initialize(event_list, view)
     @view = view
-    @controller = Controller.new(event_list, view)
+    @controller = ParserControllerONBA.new(event_list, view)
   end
 
   def run

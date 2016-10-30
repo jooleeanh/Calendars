@@ -28,7 +28,6 @@ class Router
       puts "\n"
       exit
     else
-      binding.pry
       @controller.go_to(@level, @directories[input - 1])
     end
   end

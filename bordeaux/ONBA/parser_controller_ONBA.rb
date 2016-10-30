@@ -1,4 +1,4 @@
-class Controller
+class ParserControllerONBA
     attr_reader :event_hash
 
     def initialize(event_list, view)
