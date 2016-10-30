@@ -1,16 +1,20 @@
 require "pry-byebug"
 
 class Controller
-  def initialize
-  end
-
-  def get_directories
-    Dir.chdir(File.dirname(__FILE__) + "/")
+  def get_directories(file = __FILE__)
+    Dir.chdir(File.dirname(file) + "/")
     Dir.glob('*').select { |f| File.directory? f }
   end
 
-  def go_to(directory)
-    path = File.dirname(__FILE__)+'/'+directory+'/'+directory+'_app.rb'
+  def go_to(level, directory, file = __FILE__)
+    path = File.dirname(file) + '/' + directory + '/'
+    if level == "city"
+      path += directory + '_app'
+    elsif level == "organization"
+      path += 'parser_app_' + directory
+    end
+    path += '.rb'
+    binding.pry
     system("ruby", path)
   end
 end
