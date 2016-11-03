@@ -33,11 +33,9 @@ class EventParserBSO < EventParser
       duration = piece.text.sub(composer_extra, "").scan(/\(.*\)/).first || ""
       name = piece.css(".notes-title").text.sub(composer, "").sub(composer_extra, "").sub(duration, "").sub("-", "").strip
       begin
-        piece.css(".pdf-link > a").attribute("href").text
+        program_notes_pdf = piece.css(".pdf-link > a")&.attribute("href")&.text
       rescue
         @view.error_empty_field(@attributes[:title], "program_notes_pdf")
-      else
-        program_notes_pdf = piece.css(".pdf-link > a").attribute("href").text
       end
       begin
         piece.css(".audio-link > a").attribute("data-url").text
