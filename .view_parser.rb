@@ -1,3 +1,5 @@
+require_relative '.listing'
+
 class ViewParser
   attr_reader :choices
 
@@ -18,17 +20,27 @@ class ViewParser
 
   def greeting(city, org_acronym, org_name)
     print `clear`
-    puts "Welcome to Calendars - [#{city}] - [#{org_acronym}] #{org_name}\n".light_cyan
-    puts "What would you like to do?\n".light_black
+    print LISTING[:app].light_cyan
+    print " - " + city.blue
+    print " - [" + org_acronym.light_blue + "] "
+    puts org_name.light_blue
+    print "\n"
   end
 
   def display_choices(urls_empty_bool, events_empty_bool)
-    print "Scraping status: "
-    print "(urls - "
-    urls_empty_bool ? (print "Not scraped".light_red) : (print "Scraped".green)
-    print ") (events - "
-    events_empty_bool ? (print "Not scraped".light_red) : (print "Scraped".green)
-    puts ")\n\n"
+    puts "Scraping status: "
+    if urls_empty_bool
+      (puts "[ ] " + "Calendar (event urls)".light_red)
+    else
+      (puts "[X] " + "Calendar (event urls)".green)
+    end
+    if events_empty_bool
+      (puts "[ ] " + "Events (data)".light_red)
+    else
+      (puts "[X] " + "Events (data)".green)
+    end
+    puts "\n"
+    puts "What would you like to do?\n".light_white
     @choices.each_with_index do |choice, index|
       puts "#{index.to_s.red} - #{choice}"
     end
@@ -46,6 +58,7 @@ class ViewParser
       puts "#{index}".light_red + " - #{link}"
       sleep(0.01)
     end
+    puts "\nTotal - #{array.length}".light_yellow
   end
 
   def display_hash_formatted(hash)
@@ -65,18 +78,18 @@ class ViewParser
   end
 
   def viewing_done
-    print "\n Press enter to return to menu> ".light_cyan
+    print "\nPress enter to return to menu> ".light_cyan
     gets.chomp
   end
 
   def json_done(filepath)
-    print `clear`
+    print "\n"
     puts "JSON file ".green + filepath + ".json created!".green + "\n"
     viewing_done
   end
 
   def scrape_please
-    print `clear`
+    print "\n"
     puts "Please scrape first".light_red
     viewing_done
   end

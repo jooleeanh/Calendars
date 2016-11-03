@@ -7,5 +7,10 @@ class RouterBordeaux < Router
     @controller = ControllerBordeaux.new
     @directories = @controller.get_directories
     @level = "organization"
+    begin
+      @city = Dir.glob("*.rb").first.scan(/_.*\./)[0].gsub(/_|\./, "").capitalize
+    rescue
+      @city = nil
+    end
   end
 end

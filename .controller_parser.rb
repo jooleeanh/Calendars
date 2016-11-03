@@ -1,11 +1,12 @@
 class ControllerParser
   attr_reader :events_urls, :events
 
-  def initialize(calendar_url, view)
+  def initialize(calendar_url, event_url_prefix, view)
     @view = view
     @calendar_url = calendar_url
     @events_urls = []
     @events = {}
+    @event_url_prefix = event_url_prefix
   end
 
   def scrape_url_list
@@ -34,7 +35,7 @@ class ControllerParser
       @view.scrape_please
     else
       @events_urls.each_with_index do |event_url, index|
-        event_url = @url_domain + event_url
+        event_url = @event_url_prefix + event_url
         event = create_event_parser(event_url)
         event.parse_all
         @events[index + 1] = event.attributes

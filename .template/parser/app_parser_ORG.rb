@@ -6,7 +6,8 @@ class AppParserORG
   def run
     view = ViewParserORG.new
     calendar_url = ""
-    RouterParserORG.new(calendar_url, view).run
+    event_url_prefix = ""
+    RouterParserORG.new(calendar_url, event_url_prefix, view).run
   end
 end
 

@@ -7,5 +7,6 @@ class CityRouter < Router
     @controller = CityController.new
     @directories = @controller.get_directories
     @level = "organization"
+    @city = Dir.glob("*.rb").first.scan(/_.*\./)[0].gsub(/_|\./, "").capitalize
   end
 end

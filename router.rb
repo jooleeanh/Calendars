@@ -7,13 +7,18 @@ class Router
     @controller = Controller.new
     @directories = @controller.get_directories
     @level = "city"
+    begin
+      @city = Dir.glob("*.rb").first.scan(/_.*\./)[0].gsub(/_|\./, "").capitalize
+    rescue
+      @city = nil
+    end
   end
 
   def run
     loop do
       input = -1
       while input < 0 || input > @directories.size
-        @view.greeting(@level)
+        @view.greeting(@level, @city)
         @view.display_choices(@level, @directories)
         input = gets.chomp.to_i
       end

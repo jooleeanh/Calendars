@@ -6,7 +6,7 @@ require_relative '../../.controller_parser'
 
 class ControllerParserBSO < ControllerParser
 
-  def initialize(calendar_url, view)
+  def initialize(calendar_url, event_url_prefix, view)
     super
     nokodoc = Nokogiri::HTML(open(@calendar_url))
     @calendar = CalendarParserBSO.new(nokodoc, @view, @calendar_url)
@@ -17,7 +17,7 @@ class ControllerParserBSO < ControllerParser
       @view.scrape_please
     else
       @events_urls.each_with_index do |event_url, index|
-        event_url = "https://www.bso.org" + event_url
+        event_url = @event_url_prefix + event_url
         nokodoc = Nokogiri::HTML(open(event_url))
         event = EventParserBSO.new(nokodoc, @view, event_url)
         event.parse_all

@@ -19,11 +19,11 @@ class View
     puts "\n"
   end
 
-  def greeting(level)
+  def greeting(level, city)
     print `clear`
     print "Welcome to Calendars".light_cyan
     puts " - " + "Main".light_magenta if level == "city"
-    puts " - " + level.light_magenta if level == "organization"
+    puts " - " + city.light_magenta if level == "organization"
     puts "\nSelect your #{level}:\n\n"
   end
 end

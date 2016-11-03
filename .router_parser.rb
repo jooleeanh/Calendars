@@ -1,8 +1,10 @@
+require_relative '.listing'
+
 class RouterParser
-  def initialize(calendar_url, view)
+  def initialize(calendar_url, event_url_prefix, view)
     @view = view
-    @controller = ControllerParser.new(calendar_url, view) # to override
-    @city = "city" # to override
+    @controller = ControllerParser.new(calendar_url, event_url_prefix, view) # to override
+    @city = Dir.glob("*.rb").first.scan(/_.*\./)[0].gsub(/_|\./, "").capitalize # to override
     @org_acronym = "acronym" # to override
     @org_name = "organization" # to override
   end

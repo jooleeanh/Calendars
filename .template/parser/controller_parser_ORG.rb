@@ -7,11 +7,8 @@ require_relative 'calendar_parser_ORG'
 class ControllerParserORG < ControllerParser
   # INHERITING READERS :events_urls, :events
 
-  def initialize(calendar_url, view) # OVERRIDING
-    @view = view
-    @calendar_url = calendar_url
-    @events_urls = []
-    @events = {}
+  def initialize(calendar_url, event_url_prefix, view) # OVERRIDING
+    super
     begin
       nokodoc = Nokogiri::HTML(open(@calendar_url))
       # super
@@ -21,7 +18,6 @@ class ControllerParserORG < ControllerParser
     else
       @calendar = CalendarParserORG.new(nokodoc, @view, @calendar_url)
     end
-    @url_domain = ""
   end
 
   # INHERITING :
