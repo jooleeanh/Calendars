@@ -94,7 +94,7 @@ class ViewParser
     viewing_done
   end
 
-  def begin_parsing(event_url)
+  def begin_parsing(event_url = "EVENT_URL")
     puts "\n"
     puts "=" * 50
     puts "\n"
@@ -106,11 +106,11 @@ class ViewParser
     puts "#{title[0..15]}... - skip: no performers or program notes".light_yellow
   end
 
-  def error_empty_field(title, field)
+  def error_empty_field(title, field = "FIELD")
     puts "#{title[0..15]}... - error: empty '#{field}' field".light_red
   end
 
-  def parsing_success(title, field)
+  def parsing_success(title, field = "FIELD")
     puts "#{title[0..15]}... - success: #{field}".green
   end
 

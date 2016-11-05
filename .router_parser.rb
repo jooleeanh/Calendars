@@ -32,7 +32,7 @@ class RouterParser
     when 2 then @controller.view_url_list
     when 3 then @controller.scrape_all_events
     when 4 then @controller.view_all_events
-    when 5 then @controller.store_json
+    when 5 then @controller.store_json(@org_acronym)
     end
   end
 

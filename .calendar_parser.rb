@@ -9,6 +9,7 @@ class CalendarParser
   end
 
   def store_json(events, filepath)
+    Dir.mkdir("files") unless File.directory?("files")
     File.open(filepath + '.json', 'w') do |file|
       file.write(JSON.generate(events))
     end

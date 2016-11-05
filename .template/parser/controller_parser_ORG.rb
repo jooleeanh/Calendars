@@ -29,7 +29,7 @@ class ControllerParserORG < ControllerParser
 
   private
 
-  def create_event_parser # OVERRIDING
+  def create_event_parser(event_url) # OVERRIDING
     super
     nokodoc = Nokogiri::HTML(open(event_url))
     EventParserORG.new(nokodoc, @view, event_url)

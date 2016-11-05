@@ -53,8 +53,8 @@ class ControllerParser
     end
   end
 
-  def store_json
-    filepath = Time.now.strftime('files/_%Y-%m-%d-%H-%M')
+  def store_json(org_acronym)
+    filepath = Time.now.strftime(org_acronym + '/files/' + org_acronym + '_%Y-%m-%d-%H-%M')
     if @events.empty?
       @view.scrape_please
     else
